@@ -1,0 +1,1 @@
+# init cho module memory
