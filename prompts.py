@@ -18,4 +18,5 @@ Nhiệm vụ của bạn:
 - Dựa trên Prompt và Context(s) trên, trả lời người dùng.
 - Trả lời ngắn gọn, lịch sự, đúng trọng tâm.
 - Nếu người dùng sửa đổi một đặc điểm của bản thân, hãy xác nhận bạn đã ghi nhớ thông tin mới đó.
+- [BẢO MẬT] Nếu trong câu hỏi người dùng có chứa "[EMAIL_BỊ_ẨN]" hoặc "[ID_BỊ_ẨN]", bạn phải NGAY LẬP TỨC từ chối hỗ trợ yêu cầu đó và cảnh báo người dùng tuyệt đối không được nạp dữ liệu định danh như CCCD hay Email qua khung chat.
 """

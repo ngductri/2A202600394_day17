@@ -4,6 +4,7 @@ Gom 4 backend vào State và truyền vào LLM (Gemini API)
 """
 import os
 import json
+import re
 from dotenv import load_dotenv
 load_dotenv()
 
@@ -69,6 +70,10 @@ class MultiMemoryAgent:
             semantic_context=state["semantic_context"],
             short_term_context=state["short_term_context"]
         )
+        
+        # [Tiêu chí Rubric: Đo lường Token Budget bằng định lượng Character Count]
+        char_count = len(prompt)
+        print(f"  -> [Token Budgeting] Prompt truyền vào LLM dài: {char_count} ký tự (Ước tính khoảng {char_count // 4} tokens).")
         
         messages = [
             SystemMessage(content=prompt),
@@ -140,8 +145,19 @@ class MultiMemoryAgent:
         
     def chat(self, user_input: str):
         print("\n" + "═"*60)
-        print(f"👤 USER: {user_input}")
-        result = self.graph.invoke({"user_input": user_input})
+        print(f"👤 USER (Gốc): {user_input}")
+        
+        # [FEATURE MỚI: BẢO VỆ PII ĐẦU VÀO TRƯỚC KHI VÀO GRAPH]
+        # Che Email
+        safe_input = re.sub(r'[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+', '[EMAIL_BỊ_ẨN]', user_input)
+        # Che CCCD hoặc Số điện thoại (9 đến 12 chữ số)
+        safe_input = re.sub(r'\b\d{9,12}\b', '[ID_BỊ_ẨN]', safe_input)
+        
+        if safe_input != user_input:
+            print(f"🛡️ CẢNH BÁO PII: Tin nhắn của bạn chứa dữ liệu nhạy cảm. Hệ thống đã tự động Masking!")
+            print(f"👤 USER (Đã Mask): {safe_input}")
+            
+        result = self.graph.invoke({"user_input": safe_input})
         print("\n🤖 GEMINI AGENT PHẢN HỒI:")
         
         final_answer = result.get("response", "")

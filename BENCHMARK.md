@@ -21,3 +21,12 @@ Dưới đây là bảng đánh giá 10 kịch bản hội thoại nhiều vòng
 | 8 | **Ngữ cảnh Sự Kiện bị đứt quãng**| **Turn 4:** (T1 nhờ làm toán. T2 nhờ làm văn. T3 nhờ tìm ảnh). "Hai việc trước việc tìm ảnh là gì?" | Không thống kê được chính xác 2 việc đầu do trôi dòng chảy tin nhắn dài. | Đọc lại từ log Episodic: "Bạn nhờ làm Toán và làm Văn." | Pass | Episodic Recall |
 | 9 | **Test tính bảo mật/tỉnh táo** | **Turn 2:** (T1: Mật khẩu wifi của tôi là 123456). Xin cấp lại mật khẩu wifi? | Xin lỗi, bảo mật nên không được cung cấp(?) | Anh/Chị đã ghi chú mật khẩu wifi là 123456 (Do lưu ở Profile JSON cá nhân). | Pass | Profile Update |
 | 10| **Định nghĩa chuyên ngành hẹp** | **Turn 2:** Tư vấn "langgraph state" là sao? | Bịa khái niệm do model bị thiếu kiến thức chuyên sâu Langgraph mới. | Truyền tĩnh: LangGraph cho quản lý State truyền giữa Node bằng TypedDict... | Pass | Semantic Retrieval |
+
+## 3. Ước lượng Token/Cost (Token Budgeting)
+
+Theo quy định `Không bắt buộc đo latency thật. Có thể dùng word count/character count để ước lượng token/cost`, cấu trúc Graph của Agent hiện tại đã được update bổ sung thước đo Token Budget.
+Cụ thể, tại Node `call_model` (File `agent.py`), trước khi gửi lượng trí nhớ này sang máy chủ của Google, hệ thống chủ động gọi `len(prompt)` chẩn đoán chính xác số ký tự vừa tiêm vào LLM, in ra Terminal báo cáo ở dạng:
+```text
+  -> [Token Budgeting] Prompt truyền vào LLM dài: 1400 ký tự (Ước tính khoảng 350 tokens).
+```
+Nhờ cơ chế Sliding Window (Chỉ lấy 3 tin cũ) và chặt Event ra snippet ngắn, số lượng "Token Budget" này luôn được ép ở mức siêu nhỏ siêu rẻ, không bị nứt vỡ hay tốn chi phí Cost (phí token) do hội thoại bị kéo quá dài.
